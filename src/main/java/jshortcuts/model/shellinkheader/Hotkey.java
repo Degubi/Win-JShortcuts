@@ -1,6 +1,6 @@
 package jshortcuts.model.shellinkheader;
 
-public enum HotKey {
+public enum Hotkey {
     UNASSIGNED,
     KEY_0,
     KEY_1,

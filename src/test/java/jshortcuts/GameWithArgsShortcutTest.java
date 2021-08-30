@@ -11,16 +11,16 @@ import jshortcuts.model.linkinfo.*;
 import jshortcuts.model.shellinkheader.*;
 import org.junit.jupiter.api.*;
 
-public class GuildWarsShortcutTest implements ShortcutTest {
+public class GameWithArgsShortcutTest implements ShortcutTest {
 
-    private static final Shortcut shortcut = Shortcut.parse(Path.of("src/test/resources/GuildWars.lnk"));
+    private static final Shortcut shortcut = Shortcut.parse(Path.of("src/test/resources/GameWithArgs.lnk"));
 
     @Test
     @Override
     public void testHeader() {
         var header = shortcut.header;
 
-        assertEquals(EnumSet.of(HAS_LINK_TARGET_ID_LIST, HAS_LINK_INFO, HAS_NAME, HAS_RELATIVE_PATH, HAS_WORKING_DIR, HAS_ARGUMENTS), header.linkFlags);
+        assertEquals(EnumSet.of(HAS_LINK_TARGET_ID_LIST, HAS_LINK_INFO, HAS_NAME, HAS_RELATIVE_PATH, HAS_WORKING_DIR, HAS_ARGUMENTS, IS_UNICODE, ENABLE_TARGET_METADATA), header.linkFlags);
         assertEquals(EnumSet.of(FileAttribute.ARCHIVE), header.fileAttributes);
         assertEquals(Instant.parse("2021-05-06T07:48:23.178Z"), header.creationTime);
         assertEquals(Instant.parse("2021-05-06T08:42:44.387Z"), header.accessTime);
@@ -28,8 +28,8 @@ public class GuildWarsShortcutTest implements ShortcutTest {
         assertEquals(8492776, header.fileSize);
         assertEquals(0, header.iconIndex);
         assertEquals(ShowCommand.MAXIMIZED, header.showCommand);
-        assertEquals(HotKey.KEY_P, header.hotKey);
-        assertEquals(EnumSet.of(HotKeyModifier.CTRL, HotKeyModifier.ALT), header.hotKeyModifiers);
+        assertEquals(Hotkey.KEY_P, header.hotkey);
+        assertEquals(EnumSet.of(HotkeyModifier.CTRL, HotkeyModifier.ALT), header.hotkeyModifiers);
     }
 
     @Test
@@ -156,7 +156,7 @@ public class GuildWarsShortcutTest implements ShortcutTest {
     public void testToString() {
         var expected = """
                        ShellLinkHeader {
-                           linkFlags: [HAS_LINK_TARGET_ID_LIST, HAS_LINK_INFO, HAS_NAME, HAS_RELATIVE_PATH, HAS_WORKING_DIR, HAS_ARGUMENTS]
+                           linkFlags: [HAS_LINK_TARGET_ID_LIST, HAS_LINK_INFO, HAS_NAME, HAS_RELATIVE_PATH, HAS_WORKING_DIR, HAS_ARGUMENTS, IS_UNICODE, ENABLE_TARGET_METADATA]
                            fileAttributes: [ARCHIVE]
                            creationTime: 2021-05-06T07:48:23.178Z
                            accessTime: 2021-05-06T08:42:44.387Z

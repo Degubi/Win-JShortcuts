@@ -1,5 +1,7 @@
 package jshortcuts;
 
+import static jshortcuts.utils.Constants.*;
+import static jshortcuts.model.shellinkheader.LinkFlag.*;
 import static jshortcuts.utils.ReaderUtils.*;
 
 import java.io.*;
@@ -21,14 +23,19 @@ public final class Shortcut {
 
         var itemIDListBuffer = new ArrayList<String>();
         var linkFlags = header.linkFlags;
-        var linkInfoOffset = linkFlags.contains(LinkFlag.HAS_LINK_TARGET_ID_LIST) ? fillItemIDList(lnkData, itemIDListBuffer) : LINK_INFO_OFFSET_NO_LINK_TARGED_ID_LIST;
-        var hasLinkInfo = linkFlags.contains(LinkFlag.HAS_LINK_INFO);
+        var hasLinkTargetIDList = linkFlags.contains(LinkFlag.HAS_LINK_TARGET_ID_LIST);
+        var linkInfoOffset = hasLinkTargetIDList ? readItemIDList(lnkData, FIRST_LINK_TARGET_LIST_ITEM_ID_SIZE_OFFSET, itemIDListBuffer)
+                                                 : LINK_INFO_OFFSET_WITHOUT_LINK_TARGED_ID_LIST;
         var lastReadEndOffset = new int[1];
+        var hasLinkInfo = linkFlags.contains(LinkFlag.HAS_LINK_INFO);
         var linkInfo = hasLinkInfo ? new LinkInfo(lnkData, linkInfoOffset, lastReadEndOffset) : null;
         var stringData = new StringData(lnkData, hasLinkInfo ? lastReadEndOffset[0] : linkInfoOffset, lastReadEndOffset, linkFlags);
+        var linkTargetIDList = itemIDListBuffer.toArray(String[]::new);
+
+        assert !hasLinkTargetIDList || linkTargetIDList[0].equals(MY_COMPUTER_GUID);
 
         this.header = header;
-        this.linkTargetIDList = itemIDListBuffer.toArray(String[]::new);
+        this.linkTargetIDList = linkTargetIDList;
         this.linkInfo = linkInfo;
         this.stringData = stringData;
         this.extraData = new ExtraData(lnkData, lastReadEndOffset[0]);
@@ -59,6 +66,25 @@ public final class Shortcut {
     }
 
 
+    public static ShortcutBuilder newBuilder() {
+        return new ShortcutBuilder();
+    }
+
+    public static void create(Path target, Path lnkPath) {
+        if(Files.isDirectory(target)) {
+            new ShortcutBuilder().withTarget(target)
+                                 .withLinkFlags(HAS_LINK_TARGET_ID_LIST, HAS_LINK_INFO, HAS_RELATIVE_PATH, IS_UNICODE)
+                                 .withFileAttributes(FileAttribute.DIRECTORY)
+                                 .save(lnkPath);
+        }else{
+
+        }
+    }
+
+    public static void create(String target, String lnkPath) {
+        create(Path.of(target), Path.of(lnkPath));
+    }
+
     public static Shortcut parse(byte[] data) {
         return new Shortcut(data);
     }
@@ -70,34 +96,4 @@ public final class Shortcut {
             throw new RuntimeException(e);
         }
     }
-
-
-    private static int fillItemIDList(byte[] lnkData, ArrayList<String> itemIDListBuffer) {
-        var itemIDSizeOffset = FIRST_ITEM_ID_SIZE_OFFSET;
-        var itemIDSize = read2Bytes(lnkData, itemIDSizeOffset);
-
-        while(itemIDSize != 0) {
-            var itemIDMaxDataSize = itemIDSize - 2;
-            var itemIDDataOffset = itemIDSizeOffset + 3;
-            var itemIDType = lnkData[itemIDSizeOffset + 2];
-
-            switch(itemIDType) {
-                case '/' -> itemIDListBuffer.add(readNullTerminatedStringWithLimit(lnkData, itemIDDataOffset, itemIDMaxDataSize));
-                case '1', '2' -> {
-                    var stringDataOffset = itemIDDataOffset + 11;
-
-                    itemIDListBuffer.add(readNullTerminatedStringWithLimit(lnkData, stringDataOffset, itemIDMaxDataSize));
-                }
-            };
-
-            itemIDSizeOffset += itemIDSize;
-            itemIDSize = read2Bytes(lnkData, itemIDSizeOffset);
-        }
-
-        return itemIDSizeOffset + 2;
-    }
-
-
-    private static final int FIRST_ITEM_ID_SIZE_OFFSET = ShellLinkHeader.SIZE + 2;
-    private static final int LINK_INFO_OFFSET_NO_LINK_TARGED_ID_LIST = ShellLinkHeader.SIZE + 2;
 }

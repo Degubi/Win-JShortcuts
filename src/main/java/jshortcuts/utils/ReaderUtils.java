@@ -4,8 +4,12 @@ import static jshortcuts.utils.WriterUtils.*;
 
 import java.time.*;
 import java.util.*;
+import jshortcuts.model.shellinkheader.*;
 
 public final class ReaderUtils {
+    public static final LinkFlag[] LINK_FLAGS = LinkFlag.values();
+    public static final FileAttribute[] FILE_ATTRIBUTES = FileAttribute.values();
+    public static final HotkeyModifier[] HOTKEY_MODIFIERS = HotkeyModifier.values();
 
     public static long read8Bytes(byte[] data, int begin) {
         return ((long) data[begin] & 0xFF) | (((long) data[begin + 1] & 0xFF) << 8) | (((long) data[begin + 2] & 0xFF) << 16) |
@@ -25,11 +29,12 @@ public final class ReaderUtils {
         return (data[begin] & 0xFF);
     }
 
-    public static<T extends Enum<T>> EnumSet<T> readEnumValuesFromBitFlag(int flags, Class<T> enumType, T[] enumOptions) {
+    public static<T extends Enum<T>> EnumSet<T> getEnumOptionsFromBitFlags(int flags, Class<T> enumType, T[] enumOptions) {
         var resultOptions = EnumSet.noneOf(enumType);
         var enumOptionIndex = 0;
+        var maxBitValue = 1 << enumOptions.length;
 
-        for(var i = 1; i < 128; i <<= 1) {
+        for(var i = 1; i < maxBitValue; i <<= 1) {
             if((flags & i) != 0) {
                 resultOptions.add(enumOptions[enumOptionIndex]);
             }
@@ -88,6 +93,32 @@ public final class ReaderUtils {
                toZeroPaddedHexString(read2Bytes(data, offset + 6), 4) + "-" +
                toZeroPaddedHexString(read2BytesReversed(data, offset + 8), 4) + "-" +
                toZeroPaddedHexString(read6BytesReversed(data, offset + 10), 12);
+    }
+
+    public static int readItemIDList(byte[] lnkData, int firstItemIDSizeOffset, ArrayList<String> results) {
+        var itemIDSizeOffset = firstItemIDSizeOffset;
+        var itemIDSize = read2Bytes(lnkData, itemIDSizeOffset);
+
+        while(itemIDSize != 0) {
+            var itemIDMaxDataSize = itemIDSize - 2;
+            var itemIDDataOffset = itemIDSizeOffset + 3;
+            var itemIDType = lnkData[itemIDSizeOffset + 2];
+
+            switch(itemIDType) {
+                case 31 -> results.add(readGUID(lnkData, itemIDDataOffset + 1));
+                case '/' -> results.add(readNullTerminatedStringWithLimit(lnkData, itemIDDataOffset, itemIDMaxDataSize));
+                case '1', '2' -> {
+                    var stringDataOffset = itemIDDataOffset + 11;
+
+                    results.add(readNullTerminatedStringWithLimit(lnkData, stringDataOffset, itemIDMaxDataSize));
+                }
+            };
+
+            itemIDSizeOffset += itemIDSize;
+            itemIDSize = read2Bytes(lnkData, itemIDSizeOffset);
+        }
+
+        return itemIDSizeOffset + 2;
     }
 
 

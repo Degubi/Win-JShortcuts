@@ -1,6 +1,6 @@
 package jshortcuts.model.shellinkheader;
 
-public enum HotKeyModifier {
+public enum HotkeyModifier {
     SHIFT,
     CTRL,
     ALT

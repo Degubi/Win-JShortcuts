@@ -10,9 +10,9 @@ import jshortcuts.model.linkinfo.*;
 import jshortcuts.model.shellinkheader.*;
 import org.junit.jupiter.api.*;
 
-public class ExampleShortcutTest implements ShortcutTest {
+public class ShellLinkExampleShortcutTest implements ShortcutTest {
 
-    private static final Shortcut shortcut = Shortcut.parse(Path.of("src/test/resources/ShellinkExample.lnk"));
+    private static final Shortcut shortcut = Shortcut.parse(Path.of("src/test/resources/ShellLinkExample.lnk"));
 
     @Test
     @Override
@@ -20,7 +20,7 @@ public class ExampleShortcutTest implements ShortcutTest {
         var header = shortcut.header;
         var time = Instant.parse("2008-09-12T20:27:17.101Z");
 
-        assertEquals(EnumSet.of(HAS_LINK_TARGET_ID_LIST, HAS_LINK_INFO, HAS_RELATIVE_PATH, HAS_WORKING_DIR), header.linkFlags);
+        assertEquals(EnumSet.of(HAS_LINK_TARGET_ID_LIST, HAS_LINK_INFO, HAS_RELATIVE_PATH, HAS_WORKING_DIR, IS_UNICODE, ENABLE_TARGET_METADATA), header.linkFlags);
         assertEquals(EnumSet.of(FileAttribute.ARCHIVE), header.fileAttributes);
         assertEquals(time, header.creationTime);
         assertEquals(time, header.accessTime);
@@ -28,8 +28,8 @@ public class ExampleShortcutTest implements ShortcutTest {
         assertEquals(0, header.fileSize);
         assertEquals(0, header.iconIndex);
         assertEquals(ShowCommand.NORMAL, header.showCommand);
-        assertEquals(HotKey.UNASSIGNED, header.hotKey);
-        assertEquals(EnumSet.noneOf(HotKeyModifier.class), header.hotKeyModifiers);
+        assertEquals(Hotkey.UNASSIGNED, header.hotkey);
+        assertEquals(EnumSet.noneOf(HotkeyModifier.class), header.hotkeyModifiers);
     }
 
     @Test
@@ -143,7 +143,7 @@ public class ExampleShortcutTest implements ShortcutTest {
     public void testToString() {
         var expected = """
                        ShellLinkHeader {
-                           linkFlags: [HAS_LINK_TARGET_ID_LIST, HAS_LINK_INFO, HAS_RELATIVE_PATH, HAS_WORKING_DIR]
+                           linkFlags: [HAS_LINK_TARGET_ID_LIST, HAS_LINK_INFO, HAS_RELATIVE_PATH, HAS_WORKING_DIR, IS_UNICODE, ENABLE_TARGET_METADATA]
                            fileAttributes: [ARCHIVE]
                            creationTime: 2008-09-12T20:27:17.101Z
                            accessTime: 2008-09-12T20:27:17.101Z
