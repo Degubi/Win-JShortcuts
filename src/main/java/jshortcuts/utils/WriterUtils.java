@@ -9,7 +9,7 @@ public final class WriterUtils {
 
         var result = new StringBuilder("{\n");
 
-        convertStructToEmbeddedStringForm(obj, "    ", result);
+        writeStructEmbeddedForm(obj, "    ", result);
 
         return result.append("    }").toString();
     }
@@ -24,7 +24,7 @@ public final class WriterUtils {
 
         for(var i = 0; i < objCount; ++i) {
             result.append("        {\n");
-            convertStructToEmbeddedStringForm(objs[i], "        ", result);
+            writeStructEmbeddedForm(objs[i], "        ", result);
             result.append("        }");
 
             if(i != objCount - 1) {
@@ -43,7 +43,7 @@ public final class WriterUtils {
         return "0".repeat(charCount - hexForm.length()) + hexForm;
     }
 
-    private static void convertStructToEmbeddedStringForm(Object obj, String padding, StringBuilder builder) {
+    private static void writeStructEmbeddedForm(Object obj, String padding, StringBuilder builder) {
         var lines = obj.toString().split("\n");
 
         for(var i = 1; i < lines.length - 1; ++i) {

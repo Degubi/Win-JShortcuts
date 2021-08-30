@@ -13,8 +13,8 @@ public final class PropertyStoreDataBlock {
     public final String formatID;
     public final PropertyValue[] propertyValues;
 
-    public PropertyStoreDataBlock(byte[] lnkData, int afterSigOffset) {
-        assert readBlockSize(lnkData, afterSigOffset) >= SIZE : "Property Store Data Block Size Mismatch!";
+    public PropertyStoreDataBlock(byte[] lnkData, int afterSigOffset, int blockSize) {
+        assert blockSize >= SIZE : "Property Store Data Block Size Mismatch!";
         assert read4Bytes(lnkData, afterSigOffset + 4) == 0x53505331 : "Serialized Property Storage Version Mismatch!";
 
         this.formatID = readGUID(lnkData, afterSigOffset + 8);

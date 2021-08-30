@@ -90,10 +90,6 @@ public final class ReaderUtils {
                toZeroPaddedHexString(read6BytesReversed(data, offset + 10), 12);
     }
 
-    public static int readBlockSize(byte[] data, int dataBlockOffset) {
-        return read4Bytes(data, dataBlockOffset - 8);
-    }
-
 
     private static int read2BytesReversed(byte[] data, int begin) {
         return (data[begin + 1] & 0xFF) | ((data[begin] & 0xFF) << 8);

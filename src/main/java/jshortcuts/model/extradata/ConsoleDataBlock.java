@@ -32,8 +32,8 @@ public final class ConsoleDataBlock {
     public final boolean historyNoDup;
     public final int[] colorTable;
 
-    public ConsoleDataBlock(byte[] lnkData, int afterSigOffset) {
-        assert readBlockSize(lnkData, afterSigOffset) == SIZE : "Console Data Block Size Mismatch!";
+    public ConsoleDataBlock(byte[] lnkData, int afterSigOffset, int blockSize) {
+        assert blockSize == SIZE : "Console Data Block Size Mismatch!";
 
         this.fillAttributes = getFillAttributes(read2Bytes(lnkData, afterSigOffset));
         this.popupFillAttributes = getFillAttributes(read2Bytes(lnkData, afterSigOffset + 2));

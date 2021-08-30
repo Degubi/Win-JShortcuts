@@ -13,17 +13,17 @@ public final class LinkInfo {
     public final String commonPathSuffix;
 
     public LinkInfo(byte[] lnkData, int linkInfoOffset, int[] outLastReadEndOffset) {
-        var infoHeaderSize = read4Bytes(lnkData, linkInfoOffset + 4);
+        var infoHeaderSize = read4Bytes(lnkData, linkInfoOffset + HEADER_SIZE_RELATIVE_OFFSET);
 
         assert infoHeaderSize == 0x0000001C : "LinkInfo with optional fields are not implemented!";
 
-        var linkInfoFlags = read4Bytes(lnkData, linkInfoOffset + 8);
+        var linkInfoFlags = read4Bytes(lnkData, linkInfoOffset + LINK_INFO_FLAGS_RELATIVE_OFFSET);
         var isVolumeAndLocalBasePath = linkInfoFlags == 1;
 
-        var volumeIDOffset = read4Bytes(lnkData, linkInfoOffset + 12);
-        var localBasePathOffset = read4Bytes(lnkData, linkInfoOffset + 16);
-        var commonNetworkRelativeLinkOffset = read4Bytes(lnkData, linkInfoOffset + 20);
-        var commonPathSuffixOffset = read4Bytes(lnkData, linkInfoOffset + 24);
+        var volumeIDOffset = read4Bytes(lnkData, linkInfoOffset + VOLUMEID_OFFSET_RELATIVE_OFFSET);
+        var localBasePathOffset = read4Bytes(lnkData, linkInfoOffset + LOCAL_BASE_PATH_OFFSET_RELATIVE_OFFSET);
+        var commonNetworkRelativeLinkOffset = read4Bytes(lnkData, linkInfoOffset + COMMON_NETWORK_RELATIVE_LINK_OFFSET_RELATIVE_OFFSET);
+        var commonPathSuffixOffset = read4Bytes(lnkData, linkInfoOffset + COMMON_PATH_SUFFIX_OFFSET_RELATIVE_OFFSET);
         // TODO: LocalBasePathOffsetUnicode, CommonPathSuffixOffsetUnicode
 
         assert volumeIDOffset == 0 || isVolumeAndLocalBasePath;
@@ -48,4 +48,12 @@ public final class LinkInfo {
                "    volumeID: " + formatEmbeddedStruct(volumeID) + "\n" +
                "}";
     }
+
+
+    private static final int HEADER_SIZE_RELATIVE_OFFSET = 4;
+    private static final int LINK_INFO_FLAGS_RELATIVE_OFFSET = 8;
+    private static final int VOLUMEID_OFFSET_RELATIVE_OFFSET = 12;
+    private static final int LOCAL_BASE_PATH_OFFSET_RELATIVE_OFFSET = 16;
+    private static final int COMMON_NETWORK_RELATIVE_LINK_OFFSET_RELATIVE_OFFSET = 20;
+    private static final int COMMON_PATH_SUFFIX_OFFSET_RELATIVE_OFFSET = 24;
 }

@@ -21,7 +21,7 @@ public final class Shortcut {
 
         var itemIDListBuffer = new ArrayList<String>();
         var linkFlags = header.linkFlags;
-        var linkInfoOffset = linkFlags.contains(LinkFlag.HAS_LINK_TARGET_ID_LIST) ? fillItemIDList(lnkData, itemIDListBuffer) : 0x004E;
+        var linkInfoOffset = linkFlags.contains(LinkFlag.HAS_LINK_TARGET_ID_LIST) ? fillItemIDList(lnkData, itemIDListBuffer) : LINK_INFO_OFFSET_NO_LINK_TARGED_ID_LIST;
         var hasLinkInfo = linkFlags.contains(LinkFlag.HAS_LINK_INFO);
         var lastReadEndOffset = new int[1];
         var linkInfo = hasLinkInfo ? new LinkInfo(lnkData, linkInfoOffset, lastReadEndOffset) : null;
@@ -73,28 +73,31 @@ public final class Shortcut {
 
 
     private static int fillItemIDList(byte[] lnkData, ArrayList<String> itemIDListBuffer) {
-        var sizeOffset = 0x004E;
-        var readDataSize = read2Bytes(lnkData, sizeOffset);
+        var itemIDSizeOffset = FIRST_ITEM_ID_SIZE_OFFSET;
+        var itemIDSize = read2Bytes(lnkData, itemIDSizeOffset);
 
-        while(readDataSize != 0) {
-            var maxDataSize = readDataSize - 2;
-            var typeOffset = sizeOffset + 2;
-            var dataOffset = sizeOffset + 3;
-            var type = lnkData[typeOffset];
+        while(itemIDSize != 0) {
+            var itemIDMaxDataSize = itemIDSize - 2;
+            var itemIDDataOffset = itemIDSizeOffset + 3;
+            var itemIDType = lnkData[itemIDSizeOffset + 2];
 
-            switch(type) {
-                case '/' -> itemIDListBuffer.add(readNullTerminatedStringWithLimit(lnkData, dataOffset, maxDataSize));
+            switch(itemIDType) {
+                case '/' -> itemIDListBuffer.add(readNullTerminatedStringWithLimit(lnkData, itemIDDataOffset, itemIDMaxDataSize));
                 case '1', '2' -> {
-                    var stringDataOffset = dataOffset + 11;
+                    var stringDataOffset = itemIDDataOffset + 11;
 
-                    itemIDListBuffer.add(readNullTerminatedStringWithLimit(lnkData, stringDataOffset, maxDataSize));
+                    itemIDListBuffer.add(readNullTerminatedStringWithLimit(lnkData, stringDataOffset, itemIDMaxDataSize));
                 }
             };
 
-            sizeOffset += readDataSize;
-            readDataSize = read2Bytes(lnkData, sizeOffset);
+            itemIDSizeOffset += itemIDSize;
+            itemIDSize = read2Bytes(lnkData, itemIDSizeOffset);
         }
 
-        return sizeOffset + 2;
+        return itemIDSizeOffset + 2;
     }
+
+
+    private static final int FIRST_ITEM_ID_SIZE_OFFSET = ShellLinkHeader.SIZE + 2;
+    private static final int LINK_INFO_OFFSET_NO_LINK_TARGED_ID_LIST = ShellLinkHeader.SIZE + 2;
 }

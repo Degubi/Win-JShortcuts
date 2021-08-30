@@ -7,10 +7,12 @@ import java.util.*;
 import jshortcuts.model.shellinkheader.*;
 
 public final class ShellLinkHeader {
-    private static final String LINK_CLSID = "00021401-0000-0000-c000-000000000046";
     private static final LinkFlag[] LINK_FLAGS = LinkFlag.values();
     private static final FileAttribute[] FILE_ATTRIBUTES = FileAttribute.values();
     private static final HotKeyModifier[] HOTKEY_MODIFIERS = HotKeyModifier.values();
+
+    public static final String LINK_CLSID = "00021401-0000-0000-c000-000000000046";
+    public static final int SIZE = 0x0000004c;
 
     public final EnumSet<LinkFlag> linkFlags;
     public final EnumSet<FileAttribute> fileAttributes;
@@ -24,22 +26,22 @@ public final class ShellLinkHeader {
     public final EnumSet<HotKeyModifier> hotKeyModifiers;
 
     public ShellLinkHeader(byte[] lnkData) {
-        assert read4Bytes(lnkData, 0x0000) == 0x0000004c : "ShellLinkHeader HeaderSize mismatch!";
-        assert readGUID(lnkData, 0x0004).equals(LINK_CLSID) : "ShellLinkHeader linkCLSID mismatch!";
-        assert read2Bytes(lnkData, 0x0042) == 0 : "ShellLinkHeader Reserved1 mismatch!";
-        assert read4Bytes(lnkData, 0x0044) == 0 : "ShellLinkHeader Reserved2 mismatch!";
-        assert read4Bytes(lnkData, 0x0048) == 0 : "ShellLinkHeader Reserved3 mismatch!";
+        assert read4Bytes(lnkData, SIZE_OFFSET) == SIZE : "ShellLinkHeader HeaderSize mismatch!";
+        assert readGUID(lnkData, CLSID_OFFSET).equals(LINK_CLSID) : "ShellLinkHeader linkCLSID mismatch!";
+        assert read2Bytes(lnkData, RESERVED1_OFFSET) == 0 : "ShellLinkHeader Reserved1 mismatch!";
+        assert read4Bytes(lnkData, RESERVED2_OFFSET) == 0 : "ShellLinkHeader Reserved2 mismatch!";
+        assert read4Bytes(lnkData, RESERVED3_OFFSET) == 0 : "ShellLinkHeader Reserved3 mismatch!";
 
-        this.linkFlags = readEnumValuesFromBitFlag(read4Bytes(lnkData, 0x0014), LinkFlag.class, LINK_FLAGS);
-        this.fileAttributes = readEnumValuesFromBitFlag(read4Bytes(lnkData, 0x0018), FileAttribute.class, FILE_ATTRIBUTES);
-        this.creationTime = readFileTime(lnkData, 0x001C);
-        this.accessTime = readFileTime(lnkData, 0x0024);
-        this.writeTime = readFileTime(lnkData, 0x002C);
-        this.fileSize = read4Bytes(lnkData, 0x0034);
-        this.iconIndex = read4Bytes(lnkData, 0x0038);
-        this.showCommand = getShowCommand(read4Bytes(lnkData, 0x003C));
-        this.hotKey = getHotkey(read1Byte(lnkData, 0x0040));
-        this.hotKeyModifiers = readEnumValuesFromBitFlag(read1Byte(lnkData, 0x0041), HotKeyModifier.class, HOTKEY_MODIFIERS);
+        this.linkFlags = readEnumValuesFromBitFlag(read4Bytes(lnkData, LINKFLAGS_OFFSET), LinkFlag.class, LINK_FLAGS);
+        this.fileAttributes = readEnumValuesFromBitFlag(read4Bytes(lnkData, FILEATTRIBUTES_OFFSET), FileAttribute.class, FILE_ATTRIBUTES);
+        this.creationTime = readFileTime(lnkData, CREATION_TIME_OFFSET);
+        this.accessTime = readFileTime(lnkData, ACCESS_TIME_OFFSET);
+        this.writeTime = readFileTime(lnkData, WRITE_TIME_OFFSET);
+        this.fileSize = read4Bytes(lnkData, FILE_SIZE_OFFSET);
+        this.iconIndex = read4Bytes(lnkData, ICON_INDEX_OFFSET);
+        this.showCommand = getShowCommand(read4Bytes(lnkData, SHOW_COMMAND_OFFSET));
+        this.hotKey = getHotkey(read1Byte(lnkData, HOTKEY_OFFSET));
+        this.hotKeyModifiers = readEnumValuesFromBitFlag(read1Byte(lnkData, HOTKEY_MODIFIERS_OFFSET), HotKeyModifier.class, HOTKEY_MODIFIERS);
     }
 
     @Override
@@ -154,4 +156,21 @@ public final class ShellLinkHeader {
             default -> throw new IllegalArgumentException("Unknown hotkey value: " + hotkeyLowerByte);
         };
     }
+
+
+    private static final int SIZE_OFFSET = 0x0000;
+    private static final int CLSID_OFFSET = 0x0004;
+    private static final int LINKFLAGS_OFFSET = 0x0014;
+    private static final int FILEATTRIBUTES_OFFSET = 0x0018;
+    private static final int CREATION_TIME_OFFSET = 0x001C;
+    private static final int ACCESS_TIME_OFFSET = 0x0024;
+    private static final int WRITE_TIME_OFFSET = 0x002C;
+    private static final int FILE_SIZE_OFFSET = 0x0034;
+    private static final int ICON_INDEX_OFFSET = 0x0038;
+    private static final int SHOW_COMMAND_OFFSET = 0x003C;
+    private static final int HOTKEY_OFFSET = 0x0040;
+    private static final int HOTKEY_MODIFIERS_OFFSET = 0x0041;
+    private static final int RESERVED1_OFFSET = 0x0042;
+    private static final int RESERVED2_OFFSET = 0x0044;
+    private static final int RESERVED3_OFFSET = 0x0048;
 }

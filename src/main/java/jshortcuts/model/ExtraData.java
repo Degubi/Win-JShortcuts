@@ -37,21 +37,21 @@ public final class ExtraData {
         var vistaIDListBlock = (VistaAndAboveIDListDataBlock) null;
 
         while(blockSize >= 0x00000004) {
-            var dataBlockOffset = blockSizeOffset + 8;
             var blockSignature = read4Bytes(lnkData, blockSizeOffset + 4);
+            var dataBlockOffset = blockSizeOffset + 8;
 
             switch(blockSignature) {
-                case ConsoleDataBlock.SIGNATURE             -> consoleBlock = new ConsoleDataBlock(lnkData, dataBlockOffset);
-                case ConsoleFEDataBlock.SIGNATURE           -> consoleFEBlock = new ConsoleFEDataBlock(lnkData, dataBlockOffset);
-                case DarwinDataBlock.SIGNATURE              -> darwinBlock = new DarwinDataBlock(lnkData, dataBlockOffset);
-                case EnvironmentVariableDataBlock.SIGNATURE -> envVarBlock = new EnvironmentVariableDataBlock(lnkData, dataBlockOffset);
-                case IconEnvironmentDataBlock.SIGNATURE     -> iconEnvBlock = new IconEnvironmentDataBlock(lnkData, dataBlockOffset);
-                case KnownFolderDataBlock.SIGNATURE         -> knownFolderBlock = new KnownFolderDataBlock(lnkData, dataBlockOffset);
-                case PropertyStoreDataBlock.SIGNATURE       -> propStoreBlock = new PropertyStoreDataBlock(lnkData, dataBlockOffset);
-                case ShimpDataBlock.SIGNATURE               -> shimBlock = new ShimpDataBlock(lnkData, dataBlockOffset);
-                case SpecialFolderDataBlock.SIGNATURE       -> specFolderBlock = new SpecialFolderDataBlock(lnkData, dataBlockOffset);
-                case TrackerDataBlock.SIGNATURE             -> trackerBlock = new TrackerDataBlock(lnkData, dataBlockOffset);
-                case VistaAndAboveIDListDataBlock.SIGNATURE -> vistaIDListBlock = new VistaAndAboveIDListDataBlock(lnkData, dataBlockOffset);
+                case ConsoleDataBlock.SIGNATURE             -> consoleBlock = new ConsoleDataBlock(lnkData, dataBlockOffset, blockSize);
+                case ConsoleFEDataBlock.SIGNATURE           -> consoleFEBlock = new ConsoleFEDataBlock(lnkData, dataBlockOffset, blockSize);
+                case DarwinDataBlock.SIGNATURE              -> darwinBlock = new DarwinDataBlock(lnkData, dataBlockOffset, blockSize);
+                case EnvironmentVariableDataBlock.SIGNATURE -> envVarBlock = new EnvironmentVariableDataBlock(lnkData, dataBlockOffset, blockSize);
+                case IconEnvironmentDataBlock.SIGNATURE     -> iconEnvBlock = new IconEnvironmentDataBlock(lnkData, dataBlockOffset, blockSize);
+                case KnownFolderDataBlock.SIGNATURE         -> knownFolderBlock = new KnownFolderDataBlock(lnkData, dataBlockOffset, blockSize);
+                case PropertyStoreDataBlock.SIGNATURE       -> propStoreBlock = new PropertyStoreDataBlock(lnkData, dataBlockOffset, blockSize);
+                case ShimpDataBlock.SIGNATURE               -> shimBlock = new ShimpDataBlock(lnkData, dataBlockOffset, blockSize);
+                case SpecialFolderDataBlock.SIGNATURE       -> specFolderBlock = new SpecialFolderDataBlock(lnkData, dataBlockOffset, blockSize);
+                case TrackerDataBlock.SIGNATURE             -> trackerBlock = new TrackerDataBlock(lnkData, dataBlockOffset, blockSize);
+                case VistaAndAboveIDListDataBlock.SIGNATURE -> vistaIDListBlock = new VistaAndAboveIDListDataBlock(lnkData, dataBlockOffset, blockSize);
             }
 
             blockSizeOffset += blockSize;

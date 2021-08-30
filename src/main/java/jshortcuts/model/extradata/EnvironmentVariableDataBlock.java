@@ -8,8 +8,8 @@ public final class EnvironmentVariableDataBlock {
 
     public final String target;
 
-    public EnvironmentVariableDataBlock(byte[] lnkData, int afterSigOffset) {
-        assert readBlockSize(lnkData, afterSigOffset) == SIZE : "Environment Variable Data Block Size Mismatch!";
+    public EnvironmentVariableDataBlock(byte[] lnkData, int afterSigOffset, int blockSize) {
+        assert blockSize == SIZE : "Environment Variable Data Block Size Mismatch!";
 
         this.target = readNullTerminatedString(lnkData, afterSigOffset);
     }

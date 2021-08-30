@@ -14,8 +14,8 @@ public final class TrackerDataBlock {
     public final String droidBirth1;
     public final String droidBirth2;
 
-    public TrackerDataBlock(byte[] lnkData, int afterSigOffset) {
-        assert readBlockSize(lnkData, afterSigOffset) == SIZE : "Tracker Data Block Size Mismatch!";
+    public TrackerDataBlock(byte[] lnkData, int afterSigOffset, int blockSize) {
+        assert blockSize == SIZE : "Tracker Data Block Size Mismatch!";
         assert read4Bytes(lnkData, afterSigOffset) == 0x00000058 : "Tracker Data Block Length Mismatch!";
         assert read4Bytes(lnkData, afterSigOffset + 4) == 0x00000000 : "Tracker Data Block Version Mismatch!";
 

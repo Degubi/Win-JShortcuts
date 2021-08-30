@@ -8,8 +8,8 @@ public final class ConsoleFEDataBlock {
 
     public final int codePage;
 
-    public ConsoleFEDataBlock(byte[] lnkData, int afterSigOffset) {
-        assert readBlockSize(lnkData, afterSigOffset) == SIZE : "ConsoleFE Data Block Size Mismatch!";
+    public ConsoleFEDataBlock(byte[] lnkData, int afterSigOffset, int blockSize) {
+        assert blockSize == SIZE : "ConsoleFE Data Block Size Mismatch!";
 
         this.codePage = read4Bytes(lnkData, afterSigOffset);
     }

@@ -8,8 +8,8 @@ public final class IconEnvironmentDataBlock {
 
     public final String target;
 
-    public IconEnvironmentDataBlock(byte[] lnkData, int afterSigOffset) {
-        assert readBlockSize(lnkData, afterSigOffset) == SIZE : "Icon Environment Data Block Size Mismatch!";
+    public IconEnvironmentDataBlock(byte[] lnkData, int afterSigOffset, int blockSize) {
+        assert blockSize == SIZE : "Icon Environment Data Block Size Mismatch!";
 
         this.target = readNullTerminatedString(lnkData, afterSigOffset);
     }

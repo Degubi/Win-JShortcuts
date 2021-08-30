@@ -8,8 +8,8 @@ public final class ShimpDataBlock {
 
     public final String layerName;
 
-    public ShimpDataBlock(byte[] lnkData, int afterSigOffset) {
-        assert readBlockSize(lnkData, afterSigOffset) >= SIZE : "Shimp Data Block Size Mismatch!";
+    public ShimpDataBlock(byte[] lnkData, int afterSigOffset, int blockSize) {
+        assert blockSize >= SIZE : "Shimp Data Block Size Mismatch!";
 
         this.layerName = readUnicodeString(lnkData, afterSigOffset);
     }

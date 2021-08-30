@@ -8,8 +8,8 @@ public final class SpecialFolderDataBlock {
 
     public final int specialFolderID;
 
-    public SpecialFolderDataBlock(byte[] lnkData, int afterSigOffset) {
-        assert readBlockSize(lnkData, afterSigOffset) == SIZE : "Special Folder Data Block Size Mismatch!";
+    public SpecialFolderDataBlock(byte[] lnkData, int afterSigOffset, int blockSize) {
+        assert blockSize == SIZE : "Special Folder Data Block Size Mismatch!";
 
         this.specialFolderID = read4Bytes(lnkData, afterSigOffset);
 

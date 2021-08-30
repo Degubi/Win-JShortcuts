@@ -11,8 +11,8 @@ public final class KnownFolderDataBlock {
     public final String knownFolderID;
     public final int offset;
 
-    public KnownFolderDataBlock(byte[] lnkData, int afterSigOffset) {
-        assert readBlockSize(lnkData, afterSigOffset) == SIZE : "Known Folder Data Block Size Mismatch!";
+    public KnownFolderDataBlock(byte[] lnkData, int afterSigOffset, int blockSize) {
+        assert blockSize == SIZE : "Known Folder Data Block Size Mismatch!";
 
         this.knownFolderID = readGUID(lnkData, afterSigOffset);
         this.offset = read4Bytes(lnkData, afterSigOffset + 16);
