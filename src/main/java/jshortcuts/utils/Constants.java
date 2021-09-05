@@ -24,7 +24,21 @@ public final class Constants {
 
     public static final int LINK_TARGET_ID_LIST_SIZE_OFFSET = ShellLinkHeader.SIZE;
     public static final int FIRST_LINK_TARGET_LIST_ITEM_ID_SIZE_OFFSET = ShellLinkHeader.SIZE + 2;
-    public static final int LINK_INFO_OFFSET_WITHOUT_LINK_TARGED_ID_LIST = ShellLinkHeader.SIZE + 2;
+    public static final int LINK_INFO_OFFSET_WITHOUT_LINK_TARGED_ID_LIST = ShellLinkHeader.SIZE;
+
+    public static final int LINK_INFO_SIZE_RELATIVE_OFFSET = 0;
+    public static final int LINK_INFO_HEADER_SIZE_RELATIVE_OFFSET = 4;
+    public static final int LINK_INFO_FLAGS_RELATIVE_OFFSET = 8;
+    public static final int LINK_INFO_VOLUMEID_OFFSET_RELATIVE_OFFSET = 12;
+    public static final int LINK_INFO_LOCAL_BASE_PATH_OFFSET_RELATIVE_OFFSET = 16;
+    public static final int LINK_INFO_COMMON_NETWORK_RELATIVE_LINK_OFFSET_RELATIVE_OFFSET = 20;
+    public static final int LINK_INFO_COMMON_PATH_SUFFIX_OFFSET_RELATIVE_OFFSET = 24;
+
+    public static final int VOLUME_ID_SIZE_RELATIVE_OFFSET = 0;
+    public static final int VOLUME_ID_DRIVE_TYPE_RELATIVE_OFFSET = 4;
+    public static final int VOLUME_ID_DRIVE_SERIAL_NUMBER_RELATIVE_OFFSET = 8;
+    public static final int VOLUME_LABEL_OFFSET_RELATIVE_OFFSET = 12;
+    public static final int VOLUME_LABEL_UNICODE_OFFSET_RELATIVE_OFFSET = 16;
 
     private Constants() {}
 }

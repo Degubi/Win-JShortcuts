@@ -1,6 +1,7 @@
 package jshortcuts.utils;
 
 import static java.lang.Character.*;
+import static jshortcuts.utils.Constants.*;
 
 import java.time.*;
 import java.util.*;
@@ -17,7 +18,7 @@ public final class WriterUtils {
         data[offset + 6] = (byte) ((value & 0x00FF000000000000L) >> 48);
         data[offset + 7] = (byte) ((value & 0xFF00000000000000L) >> 56);
 
-        return offset + 4;
+        return offset + 8;
     }
 
     public static int write4Bytes(byte[] data, int value, int offset) {
@@ -33,13 +34,13 @@ public final class WriterUtils {
         data[offset] = (byte) ((value & 0x000000FF));
         data[offset + 1] = (byte) ((value & 0x0000FF00) >> 8);
 
-        return offset + 4;
+        return offset + 2;
     }
 
     public static int write1Byte(byte[] data, int value, int offset) {
         data[offset] = (byte) ((value & 0x000000FF));
 
-        return offset + 4;
+        return offset + 1;
     }
 
     public static<T extends Enum<T>> int getBitFlagsFromEnumOptions(EnumSet<T> options, T[] enumOptions) {
@@ -59,7 +60,7 @@ public final class WriterUtils {
     }
 
     public static int writeFileTime(byte[] data, Instant value, int offset) {
-        write8Bytes(data, value.toEpochMilli() * 10000 + 11644473600000L, offset);
+        write8Bytes(data, (value.toEpochMilli() + 11644473600000L) * 10000L , offset);
 
         return offset + 8;
     }
@@ -74,6 +75,67 @@ public final class WriterUtils {
         writeReversedGUIDBytesToBuffer(data, offset + 10, guidData, 24, 36);
 
         return offset + 16;
+    }
+
+    public static int calculateItemIDSize(String[] ids) {
+        if(ids == null) {
+            return 0;
+        }
+
+        var totalSize = 3;
+
+        for(var i = 0; i < ids.length; ++i) {
+            var id = ids[i];
+
+            totalSize += id.equals(MY_COMPUTER_GUID) ? 20 :
+                         id.charAt(1) == ':' ? (3 + id.length() + 1 + 18) :
+                                               (14 + id.length() + 1);
+        }
+
+        return totalSize;
+    }
+
+    public static int writeItemIDList(byte[] outData, int firstItemIDSizeOffset, int listSize, String[] ids) {
+        if(ids == null) {
+            return firstItemIDSizeOffset;
+        }
+
+        write2Bytes(outData, listSize, firstItemIDSizeOffset);
+
+        var currentOffset = firstItemIDSizeOffset + 2;
+        for(var i = 0; i < ids.length; ++i) {
+            var id = ids[i];
+
+            if(id.equals(MY_COMPUTER_GUID)) {
+                currentOffset = write2Bytes(outData, 20, currentOffset);  // size
+                currentOffset = write1Byte(outData, 31, currentOffset);   // type
+                ++currentOffset;                                          // Unknown
+                currentOffset = writeGUID(outData, MY_COMPUTER_GUID, currentOffset);
+            }else if(id.charAt(1) == ':') {
+                currentOffset = write2Bytes(outData, 25, currentOffset);  // size
+                currentOffset = write1Byte(outData, 47, currentOffset);   // type
+                currentOffset = writeNullTerminatedString(outData, id, currentOffset);
+                currentOffset += 18;                                      // Skip a ton, idk what's there
+            }else{
+                currentOffset = write2Bytes(outData, 21, currentOffset);  // size
+                currentOffset = write1Byte(outData, 49, currentOffset);   // type
+                currentOffset += 9;                                       // Skip a ton, idk what's there
+                currentOffset = write2Bytes(outData, 16, currentOffset);  // folder attributes
+                currentOffset = writeNullTerminatedString(outData, id, currentOffset);
+            }
+        }
+
+        return currentOffset + 3;
+    }
+
+    public static int writeNullTerminatedString(byte[] outData, String data, int offset) {
+        var strBytes = data.getBytes();
+        var strBytesLength = strBytes.length;
+
+        System.arraycopy(strBytes, 0, outData, offset, strBytesLength);
+        outData[offset + strBytesLength] = '\0';
+
+        return offset + strBytesLength + 1;
     }
 
 

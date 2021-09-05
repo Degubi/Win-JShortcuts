@@ -72,12 +72,16 @@ public final class Shortcut {
 
     public static void create(Path target, Path lnkPath) {
         if(Files.isDirectory(target)) {
-            new ShortcutBuilder().withTarget(target)
-                                 .withLinkFlags(HAS_LINK_TARGET_ID_LIST, HAS_LINK_INFO, HAS_RELATIVE_PATH, IS_UNICODE)
-                                 .withFileAttributes(FileAttribute.DIRECTORY)
-                                 .save(lnkPath);
+            Shortcut.newBuilder()
+                    .withTarget(target)
+                    .withLinkFlags(HAS_LINK_TARGET_ID_LIST, HAS_LINK_INFO, HAS_RELATIVE_PATH, IS_UNICODE)
+                    .withFileAttributes(FileAttribute.DIRECTORY)
+                    .save(lnkPath);
         }else{
-
+            Shortcut.newBuilder()
+                    .withTarget(target)
+                    .withLinkFlags(HAS_LINK_TARGET_ID_LIST, HAS_LINK_INFO, HAS_RELATIVE_PATH, HAS_WORKING_DIR, IS_UNICODE)
+                    .save(lnkPath);
         }
     }
 

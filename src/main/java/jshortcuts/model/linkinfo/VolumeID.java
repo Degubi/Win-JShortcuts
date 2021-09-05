@@ -1,5 +1,6 @@
 package jshortcuts.model.linkinfo;
 
+import static jshortcuts.utils.Constants.*;
 import static jshortcuts.utils.ReaderUtils.*;
 
 import java.util.*;
@@ -13,8 +14,8 @@ public final class VolumeID {
     public VolumeID(byte[] lnkData, int volumeIDOffset) {
         assert read4Bytes(lnkData, volumeIDOffset + VOLUME_ID_SIZE_RELATIVE_OFFSET) >= 0x00000010 : "Volume ID Size Mismatch!";
 
-        this.driveType = getDriveType(read4Bytes(lnkData, volumeIDOffset + DRIVE_TYPE_RELATIVE_OFFSET));
-        this.driveSerialNumber = read4Bytes(lnkData, volumeIDOffset + DRIVE_SERIAL_NUMBER_RELATIVE_OFFSET);
+        this.driveType = getDriveType(read4Bytes(lnkData, volumeIDOffset + VOLUME_ID_DRIVE_TYPE_RELATIVE_OFFSET));
+        this.driveSerialNumber = read4Bytes(lnkData, volumeIDOffset + VOLUME_ID_DRIVE_SERIAL_NUMBER_RELATIVE_OFFSET);
 
         var volumeLabelOffset = read4Bytes(lnkData, volumeIDOffset + VOLUME_LABEL_OFFSET_RELATIVE_OFFSET);
 
@@ -57,11 +58,4 @@ public final class VolumeID {
             default -> DriveType.UNKNOWN;
         };
     }
-
-
-    private static final int VOLUME_ID_SIZE_RELATIVE_OFFSET = 0;
-    private static final int DRIVE_TYPE_RELATIVE_OFFSET = 4;
-    private static final int DRIVE_SERIAL_NUMBER_RELATIVE_OFFSET = 8;
-    private static final int VOLUME_LABEL_OFFSET_RELATIVE_OFFSET = 12;
-    private static final int VOLUME_LABEL_UNICODE_OFFSET_RELATIVE_OFFSET = 16;
 }

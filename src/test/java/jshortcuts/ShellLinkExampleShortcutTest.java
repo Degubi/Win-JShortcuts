@@ -35,7 +35,7 @@ public class ShellLinkExampleShortcutTest implements ShortcutTest {
     @Test
     @Override
     public void testLinkTargetIDList() {
-        assertArrayEquals(new String[] { "C:\\", "test", "a.txt" }, shortcut.linkTargetIDList);
+        assertArrayEquals(new String[] { ShortcutTest.MY_COMPUTER_GUID, "C:\\", "test", "a.txt" }, shortcut.linkTargetIDList);
     }
 
     @Test
@@ -155,6 +155,7 @@ public class ShellLinkExampleShortcutTest implements ShortcutTest {
                            hotKeyModifiers: []
                        }
                        LinkTargetIDList [
+                           MY_COMPUTER_GUID_PLACEHOLDER
                            C:\\
                            test
                            a.txt
@@ -194,8 +195,14 @@ public class ShellLinkExampleShortcutTest implements ShortcutTest {
                                droidBirth2: 7bcd46ec-7f22-11dd-9499-00137216874a
                            }
                            vistaAndAboveIDListDataBlock: {}
-                       }""";
+                       }""".replaceFirst("MY_COMPUTER_GUID_PLACEHOLDER", ShortcutTest.MY_COMPUTER_GUID);
 
         assertEquals(expected, shortcut.toString());
+    }
+
+    @Test
+    @Override
+    public void testShortcutWrite() {
+
     }
 }

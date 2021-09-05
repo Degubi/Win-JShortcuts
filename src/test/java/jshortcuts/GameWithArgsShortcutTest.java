@@ -35,7 +35,7 @@ public class GameWithArgsShortcutTest implements ShortcutTest {
     @Test
     @Override
     public void testLinkTargetIDList() {
-        assertArrayEquals(new String[] { "C:\\", "PROGRA~2", "GUILDW~1", "Gw.exe" }, shortcut.linkTargetIDList);
+        assertArrayEquals(new String[] { ShortcutTest.MY_COMPUTER_GUID, "C:\\", "PROGRA~2", "GUILDW~1", "Gw.exe" }, shortcut.linkTargetIDList);
     }
 
     @Test
@@ -168,6 +168,7 @@ public class GameWithArgsShortcutTest implements ShortcutTest {
                            hotKeyModifiers: [CTRL, ALT]
                        }
                        LinkTargetIDList [
+                           MY_COMPUTER_GUID_PLACEHOLDER
                            C:\\
                            PROGRA~2
                            GUILDW~1
@@ -221,8 +222,14 @@ public class GameWithArgsShortcutTest implements ShortcutTest {
                                droidBirth2: 95398e43-ae2f-11eb-ba46-f832e4cd580b
                            }
                            vistaAndAboveIDListDataBlock: {}
-                       }""";
+                       }""".replaceFirst("MY_COMPUTER_GUID_PLACEHOLDER", ShortcutTest.MY_COMPUTER_GUID);
 
         assertEquals(expected, shortcut.toString());
+    }
+
+    @Test
+    @Override
+    public void testShortcutWrite() {
+
     }
 }

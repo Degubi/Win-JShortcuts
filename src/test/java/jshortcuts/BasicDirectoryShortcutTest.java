@@ -3,6 +3,7 @@ package jshortcuts;
 import static jshortcuts.model.shellinkheader.LinkFlag.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.*;
 import java.nio.file.*;
 import java.time.*;
 import java.util.*;
@@ -35,7 +36,7 @@ public class BasicDirectoryShortcutTest implements ShortcutTest {
     @Test
     @Override
     public void testLinkTargetIDList() {
-        assertArrayEquals(new String[] { "C:\\", "Users" }, shortcut.linkTargetIDList);
+        assertArrayEquals(new String[] { ShortcutTest.MY_COMPUTER_GUID, "C:\\", "Users" }, shortcut.linkTargetIDList);
     }
 
     @Test
@@ -149,6 +150,7 @@ public class BasicDirectoryShortcutTest implements ShortcutTest {
                            hotKeyModifiers: []
                        }
                        LinkTargetIDList [
+                           MY_COMPUTER_GUID_PLACEHOLDER
                            C:\\
                            Users
                        ]
@@ -181,8 +183,30 @@ public class BasicDirectoryShortcutTest implements ShortcutTest {
                            specialFolderDataBlock: {}
                            trackerDataBlock: {}
                            vistaAndAboveIDListDataBlock: {}
-                       }""";
+                       }""".replaceFirst("MY_COMPUTER_GUID_PLACEHOLDER", ShortcutTest.MY_COMPUTER_GUID);
 
         assertEquals(expected, shortcut.toString());
+    }
+
+    @Test
+    @Override
+    public void testShortcutWrite() throws IOException {
+        var shortcutPath = Path.of("basicDirectory.lnk");
+        var time = Instant.parse("1601-01-16T08:44:40.088Z");
+
+        Shortcut.newBuilder()
+                .withTarget(Path.of("C:\\Users"))
+                .withLinkFlags(HAS_LINK_TARGET_ID_LIST, HAS_LINK_INFO, HAS_RELATIVE_PATH, IS_UNICODE)
+                .withFileAttributes(FileAttribute.DIRECTORY)
+                .withAccessTime(time)
+                .withCreationTime(time)
+                .withWriteTime(time)
+                .save(shortcutPath);
+
+        var parsedShortcut = Shortcut.parse(shortcutPath);
+
+        Files.delete(shortcutPath);
+
+        assertEquals(shortcut, parsedShortcut);
     }
 }

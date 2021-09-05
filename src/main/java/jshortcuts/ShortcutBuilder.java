@@ -87,16 +87,20 @@ public final class ShortcutBuilder {
     public void save(Path lnkPath) {
         var defaultTime = Instant.now();
 
+        var linkFlags = this.linkFlags == null ? EnumSet.noneOf(LinkFlag.class) : this.linkFlags;
+        var fileAttributes = this.fileAttributes == null ? EnumSet.noneOf(FileAttribute.class) : this.fileAttributes;
         var creationTime = this.creationTime == null ? defaultTime : this.creationTime;
         var accessTime = this.accessTime == null ? defaultTime : this.accessTime;
         var writeTime = this.writeTime == null ? defaultTime : this.writeTime;
         var showCommand = this.showCommand == null ? ShowCommand.NORMAL : this.showCommand;
         var hotkey = this.hotkey == null ? Hotkey.UNASSIGNED : this.hotkey;
         var hotkeyModifiers = this.hotkeyModifiers == null ? EnumSet.noneOf(HotkeyModifier.class) : this.hotkeyModifiers;
-        var linkTargetIDList = PATH_SEPARATOR_SPLITTER.split(target.toAbsolutePath().toString());
 
-        //var data = new byte[ShellLinkHeader.SIZE];
-        var data = new byte[255];
+        var hasLinkTargetIDList = linkFlags.contains(LinkFlag.HAS_LINK_TARGET_ID_LIST);
+        var linkTargetIDList = hasLinkTargetIDList ? createLinkTargetIDList(target) : null;
+        var linkTargetIDListSize = calculateItemIDSize(linkTargetIDList);
+
+        var data = new byte[512];
 
         write4Bytes(data, ShellLinkHeader.SIZE, LINK_HEADER_SIZE_OFFSET);
         writeGUID(data, ShellLinkHeader.LINK_CLSID, LINK_HEADER_CLSID_OFFSET);
@@ -111,6 +115,20 @@ public final class ShortcutBuilder {
         write1Byte(data, getHotkeyValue(hotkey), LINK_HEADER_HOTKEY_OFFSET);
         write1Byte(data, getBitFlagsFromEnumOptions(hotkeyModifiers, ReaderUtils.HOTKEY_MODIFIERS), LINK_HEADER_HOTKEY_OFFSET);
 
+        writeItemIDList(data, LINK_TARGET_ID_LIST_SIZE_OFFSET, linkTargetIDListSize, linkTargetIDList);
+
+        var linkInfoOffset = LINK_TARGET_ID_LIST_SIZE_OFFSET + linkTargetIDListSize + (hasLinkTargetIDList ? 2 : 0);
+
+        write4Bytes(data, 55, linkInfoOffset + LINK_INFO_SIZE_RELATIVE_OFFSET);
+        write4Bytes(data, 0x0000001C, linkInfoOffset + LINK_INFO_HEADER_SIZE_RELATIVE_OFFSET);
+        write4Bytes(data, 1, linkInfoOffset + LINK_INFO_FLAGS_RELATIVE_OFFSET);
+        write4Bytes(data, 28, linkInfoOffset + LINK_INFO_VOLUMEID_OFFSET_RELATIVE_OFFSET);
+        write4Bytes(data, 45, linkInfoOffset + LINK_INFO_LOCAL_BASE_PATH_OFFSET_RELATIVE_OFFSET);
+        var volumeIDOffset = write4Bytes(data, 54, linkInfoOffset + LINK_INFO_COMMON_PATH_SUFFIX_OFFSET_RELATIVE_OFFSET);
+
+        write4Bytes(data, 17, volumeIDOffset + VOLUME_ID_SIZE_RELATIVE_OFFSET);
+        write4Bytes(data, 0x00000003, volumeIDOffset + VOLUME_ID_DRIVE_TYPE_RELATIVE_OFFSET);
+
         try {
             Files.write(lnkPath, data);
         } catch (IOException e) {
@@ -119,6 +137,15 @@ public final class ShortcutBuilder {
     }
 
 
+    private static String[] createLinkTargetIDList(Path target) {
+        var pathSubparts = PATH_SEPARATOR_SPLITTER.split(target.toAbsolutePath().toString());
+        var linkTargetIDList = new String[pathSubparts.length + 1];
+
+        linkTargetIDList[0] = MY_COMPUTER_GUID;
+        System.arraycopy(pathSubparts, 0, linkTargetIDList, 1, pathSubparts.length);
+
+        return linkTargetIDList;
+    }
 
     private static int getShowCommandValue(ShowCommand command) {
         return command == ShowCommand.MINNO_ACTIVE ? 0x00000007 :

@@ -106,8 +106,8 @@ public final class ReaderUtils {
 
             switch(itemIDType) {
                 case 31 -> results.add(readGUID(lnkData, itemIDDataOffset + 1));
-                case '/' -> results.add(readNullTerminatedStringWithLimit(lnkData, itemIDDataOffset, itemIDMaxDataSize));
-                case '1', '2' -> {
+                case 35, 47 -> results.add(readNullTerminatedStringWithLimit(lnkData, itemIDDataOffset, itemIDMaxDataSize));
+                case 49, 50 -> {
                     var stringDataOffset = itemIDDataOffset + 11;
 
                     results.add(readNullTerminatedStringWithLimit(lnkData, stringDataOffset, itemIDMaxDataSize));
