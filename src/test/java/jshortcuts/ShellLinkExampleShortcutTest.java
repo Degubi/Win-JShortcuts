@@ -3,6 +3,7 @@ package jshortcuts;
 import static jshortcuts.model.shellinkheader.LinkFlag.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.*;
 import java.nio.file.*;
 import java.time.*;
 import java.util.*;
@@ -202,7 +203,7 @@ public class ShellLinkExampleShortcutTest implements ShortcutTest {
 
     @Test
     @Override
-    public void testShortcutWrite() {
+    public void testShortcutWrite() throws IOException {
 
     }
 }

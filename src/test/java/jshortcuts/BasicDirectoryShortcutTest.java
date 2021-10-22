@@ -203,10 +203,8 @@ public class BasicDirectoryShortcutTest implements ShortcutTest {
                 .withWriteTime(time)
                 .save(shortcutPath);
 
-        var parsedShortcut = Shortcut.parse(shortcutPath);
+        assertEquals(shortcut, Shortcut.parse(shortcutPath));
 
         Files.delete(shortcutPath);
-
-        assertEquals(shortcut, parsedShortcut);
     }
 }

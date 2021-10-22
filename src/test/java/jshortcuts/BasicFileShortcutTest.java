@@ -198,10 +198,8 @@ public class BasicFileShortcutTest implements ShortcutTest {
 
         Shortcut.create(Path.of("C:\\Program Files\\Java\\jdk-16\\bin\\java.exe"), shortcutPath);
 
-        var parsedShortcut = Shortcut.parse(shortcutPath);
+        assertEquals(shortcut, Shortcut.parse(shortcutPath));
 
         Files.delete(shortcutPath);
-
-        assertEquals(shortcut, parsedShortcut);
     }
 }

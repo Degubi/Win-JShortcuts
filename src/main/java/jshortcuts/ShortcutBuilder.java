@@ -25,6 +25,8 @@ public final class ShortcutBuilder {
     private ShowCommand showCommand;
     private Hotkey hotkey;
     private EnumSet<HotkeyModifier> hotkeyModifiers;
+    private String volumeLabel = "";
+    private Path workingDir;
 
     private Path target;
 
@@ -79,6 +81,11 @@ public final class ShortcutBuilder {
         return withTarget(Path.of(target));
     }
 
+    public ShortcutBuilder withWorkingDirectory(Path workingDir) {
+        this.workingDir = workingDir;
+        return this;
+    }
+
 
     public void save(String lnkPath) {
         save(Path.of(lnkPath));
@@ -86,6 +93,9 @@ public final class ShortcutBuilder {
 
     public void save(Path lnkPath) {
         var defaultTime = Instant.now();
+
+        var saveDir = lnkPath.toAbsolutePath().getParent();
+        var relativePath = saveDir.relativize(target).toString();
 
         var linkFlags = this.linkFlags == null ? EnumSet.noneOf(LinkFlag.class) : this.linkFlags;
         var fileAttributes = this.fileAttributes == null ? EnumSet.noneOf(FileAttribute.class) : this.fileAttributes;
@@ -95,12 +105,18 @@ public final class ShortcutBuilder {
         var showCommand = this.showCommand == null ? ShowCommand.NORMAL : this.showCommand;
         var hotkey = this.hotkey == null ? Hotkey.UNASSIGNED : this.hotkey;
         var hotkeyModifiers = this.hotkeyModifiers == null ? EnumSet.noneOf(HotkeyModifier.class) : this.hotkeyModifiers;
+        var targetPath = target.toAbsolutePath().toString();
+        var workingDir = this.workingDir.toAbsolutePath().toString();
 
         var hasLinkTargetIDList = linkFlags.contains(LinkFlag.HAS_LINK_TARGET_ID_LIST);
         var linkTargetIDList = hasLinkTargetIDList ? createLinkTargetIDList(target) : null;
-        var linkTargetIDListSize = calculateItemIDSize(linkTargetIDList);
 
-        var data = new byte[512];
+        var linkTargetIDListSize = calculateItemIDSize(linkTargetIDList);
+        var volumeIDSize = 16 + calculateNullTerminatedStringSize(volumeLabel);
+        var linkInfoSize = LinkInfo.HEADER_SIZE + volumeIDSize + calculateNullTerminatedStringSize(targetPath) + 1; // + 1 is unknown, it is after writing the target path, before the string data
+        var workingDirPathSize = linkFlags.contains(LinkFlag.HAS_WORKING_DIR) ? calculateStringDataStringSize(workingDir) : 0;
+        var relativePathSize = linkFlags.contains(LinkFlag.HAS_RELATIVE_PATH) ? calculateStringDataStringSize(relativePath) : 0;
+        var data = new byte[ShellLinkHeader.SIZE + linkTargetIDListSize + linkInfoSize + relativePathSize + workingDirPathSize + 4 + 2]; // 2 bytes are getting lost somewhere
 
         write4Bytes(data, ShellLinkHeader.SIZE, LINK_HEADER_SIZE_OFFSET);
         writeGUID(data, ShellLinkHeader.LINK_CLSID, LINK_HEADER_CLSID_OFFSET);
@@ -118,16 +134,23 @@ public final class ShortcutBuilder {
         writeItemIDList(data, LINK_TARGET_ID_LIST_SIZE_OFFSET, linkTargetIDListSize, linkTargetIDList);
 
         var linkInfoOffset = LINK_TARGET_ID_LIST_SIZE_OFFSET + linkTargetIDListSize + (hasLinkTargetIDList ? 2 : 0);
-
-        write4Bytes(data, 55, linkInfoOffset + LINK_INFO_SIZE_RELATIVE_OFFSET);
-        write4Bytes(data, 0x0000001C, linkInfoOffset + LINK_INFO_HEADER_SIZE_RELATIVE_OFFSET);
+        write4Bytes(data, linkInfoSize, linkInfoOffset + LINK_INFO_SIZE_RELATIVE_OFFSET);
+        write4Bytes(data, LinkInfo.HEADER_SIZE, linkInfoOffset + LINK_INFO_HEADER_SIZE_RELATIVE_OFFSET);
         write4Bytes(data, 1, linkInfoOffset + LINK_INFO_FLAGS_RELATIVE_OFFSET);
         write4Bytes(data, 28, linkInfoOffset + LINK_INFO_VOLUMEID_OFFSET_RELATIVE_OFFSET);
         write4Bytes(data, 45, linkInfoOffset + LINK_INFO_LOCAL_BASE_PATH_OFFSET_RELATIVE_OFFSET);
         var volumeIDOffset = write4Bytes(data, 54, linkInfoOffset + LINK_INFO_COMMON_PATH_SUFFIX_OFFSET_RELATIVE_OFFSET);
 
-        write4Bytes(data, 17, volumeIDOffset + VOLUME_ID_SIZE_RELATIVE_OFFSET);
+        write4Bytes(data, volumeIDSize, volumeIDOffset + VOLUME_ID_SIZE_RELATIVE_OFFSET);
         write4Bytes(data, 0x00000003, volumeIDOffset + VOLUME_ID_DRIVE_TYPE_RELATIVE_OFFSET);
+        write4Bytes(data, 0, volumeIDOffset + VOLUME_ID_DRIVE_SERIAL_NUMBER_RELATIVE_OFFSET);
+        write4Bytes(data, 16, volumeIDOffset + VOLUME_LABEL_OFFSET_RELATIVE_OFFSET);
+
+        var volumeLabelOffset = writeNullTerminatedString(data, volumeLabel, volumeIDOffset + 16);
+        var targetPathOffset = writeNullTerminatedString(data, targetPath, volumeLabelOffset);
+
+        var relativePathOffset = writeStringData(data, relativePath, targetPathOffset + 1);
+        var workingDirPathOffset = writeStringData(data, workingDir, relativePathOffset);
 
         try {
             Files.write(lnkPath, data);
@@ -142,7 +165,15 @@ public final class ShortcutBuilder {
         var linkTargetIDList = new String[pathSubparts.length + 1];
 
         linkTargetIDList[0] = MY_COMPUTER_GUID;
-        System.arraycopy(pathSubparts, 0, linkTargetIDList, 1, pathSubparts.length);
+
+        for(var i = 0; i < pathSubparts.length; ++i) {
+            var path = pathSubparts[i];
+            var pathLength = path.length();
+            var isSlashTerminated = path.charAt(pathLength - 1) == '\\';
+            var toAppend = isSlashTerminated ? (path.charAt(pathLength - 2) == ':' ? path : path.substring(0, pathLength - 1)) : path;
+
+            linkTargetIDList[i + 1] = toAppend;
+        }
 
         return linkTargetIDList;
     }

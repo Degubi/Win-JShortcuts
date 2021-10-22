@@ -95,6 +95,14 @@ public final class WriterUtils {
         return totalSize;
     }
 
+    public static int calculateNullTerminatedStringSize(String data) {
+        return data.length() + 1;
+    }
+
+    public static int calculateStringDataStringSize(String data) {
+        return data.length() * 2 + 2;
+    }
+
     public static int writeItemIDList(byte[] outData, int firstItemIDSizeOffset, int listSize, String[] ids) {
         if(ids == null) {
             return firstItemIDSizeOffset;
@@ -136,6 +144,22 @@ public final class WriterUtils {
         outData[offset + strBytesLength] = '\0';
 
         return offset + strBytesLength + 1;
+    }
+
+    public static int writeStringData(byte[] outData, String data, int offset) {
+        write2Bytes(outData, data.length(), offset);
+
+        return writeUnicodeString(outData, data, offset + 2);
+    }
+
+    public static int writeUnicodeString(byte[] outData, String data, int offset) {
+        var stringLength = data.length();
+
+        for(int i = 0, insertIndex = 0; i < stringLength; ++i, insertIndex += 2) {
+            write2Bytes(outData, data.charAt(i), offset + insertIndex);
+        }
+
+        return offset + (stringLength * 2);
     }
 
 

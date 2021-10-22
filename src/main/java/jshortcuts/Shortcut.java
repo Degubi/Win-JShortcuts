@@ -81,6 +81,7 @@ public final class Shortcut {
             Shortcut.newBuilder()
                     .withTarget(target)
                     .withLinkFlags(HAS_LINK_TARGET_ID_LIST, HAS_LINK_INFO, HAS_RELATIVE_PATH, HAS_WORKING_DIR, IS_UNICODE)
+                    .withWorkingDirectory(target.getParent())
                     .save(lnkPath);
         }
     }

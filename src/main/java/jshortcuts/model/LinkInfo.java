@@ -4,9 +4,11 @@ import static jshortcuts.utils.Constants.*;
 import static jshortcuts.utils.ReaderUtils.*;
 import static jshortcuts.utils.WriterUtils.*;
 
+import java.util.*;
 import jshortcuts.model.linkinfo.*;
 
 public final class LinkInfo {
+    public static final int HEADER_SIZE = 0x0000001C;
 
     public final LinkInfoFlag linkInfoFlag;
     public final VolumeID volumeID;
@@ -14,9 +16,7 @@ public final class LinkInfo {
     public final String commonPathSuffix;
 
     public LinkInfo(byte[] lnkData, int linkInfoOffset, int[] outLastReadEndOffset) {
-        var infoHeaderSize = read4Bytes(lnkData, linkInfoOffset + LINK_INFO_HEADER_SIZE_RELATIVE_OFFSET);
-
-        assert infoHeaderSize == 0x0000001C : "LinkInfo with optional fields are not implemented!";
+        assert read4Bytes(lnkData, linkInfoOffset + LINK_INFO_HEADER_SIZE_RELATIVE_OFFSET) == HEADER_SIZE : "LinkInfo with optional fields are not implemented!";
 
         var linkInfoFlags = read4Bytes(lnkData, linkInfoOffset + LINK_INFO_FLAGS_RELATIVE_OFFSET);
         var isVolumeAndLocalBasePath = linkInfoFlags == 1;
@@ -48,5 +48,19 @@ public final class LinkInfo {
                "    commonPathSuffix: '" + commonPathSuffix + "'\n" +
                "    volumeID: " + formatEmbeddedStruct(volumeID) + "\n" +
                "}";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof LinkInfo info &&
+               info.linkInfoFlag == linkInfoFlag &&
+               Objects.equals(info.volumeID, volumeID) &&
+               Objects.equals(info.localBasePath, localBasePath) &&
+               info.commonPathSuffix.equals(commonPathSuffix);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(linkInfoFlag, volumeID, localBasePath, commonPathSuffix);
     }
 }
